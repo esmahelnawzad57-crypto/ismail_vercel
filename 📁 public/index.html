@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پرسیاری نهێنی</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎲 پرسیاری نهێنی 🎲</h1>
+        <p class="subtitle">پرسیارەکەت بنووسە، بە شێوەیەکی هەڕەمەکی بۆ یەکێک لەم شەش هاوڕێیە دەچێت بەبێ ئەوەی بزانیت کامەیانە!</p>
+
+        <div class="friends-grid" id="friendsGrid">
+            <div class="friend-card" data-name="شەنیار">شەنیار</div>
+            <div class="friend-card" data-name="عبدالباست">عبدالباست</div>
+            <div class="friend-card" data-name="اسماعیل">اسماعیل</div>
+            <div class="friend-card" data-name="سۆنیا">سۆنیا</div>
+            <div class="friend-card" data-name="شەهین">شەهین</div>
+            <div class="friend-card" data-name="ڕاز">ڕاز</div>
+        </div>
+
+        <div class="input-section">
+            <textarea id="questionInput" placeholder="لێرە پرسیارە نهێنییەکەت بنووسە... 🤔"></textarea>
+            <button id="sendBtn" onclick="startRandomSelection()">ناردنی نهێنی 🚀</button>
+        </div>
+
+        <div id="statusMessage" class="status-box"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
