@@ -5,7 +5,7 @@ const friendName = urlParams.get('n');
 
 if (origQuestion && friendName) {
     // ئەگەر ئیسماعیل لینکەکەی کردبێتەوە، دیزاینی سایتەکە دەگۆڕێت بۆ بۆکسی وەڵامدانەوە
-    document.querySelector('.subtitle').innerText = `سڵاو ${friendName}، وەڵامی ئەم پرسیارە بدەرەوە تا بچێتە گرووپە کۆنەکەتان.`;
+    document.querySelector('.subtitle').innerText = `سڵاو ${friendName}، وەڵامی ئەم پرسیارە بدەرەوە تا بچێتە گرووپەکە.`;
     document.getElementById('questionInput').placeholder = "وەڵامەکەت لێرە بنووسە... 💬";
     document.getElementById('questionInput').value = "";
     
