@@ -1,17 +1,59 @@
-async function startRandomSelection() {
-    const questionInput = document.getElementById('questionInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const statusMessage = document.getElementById('statusMessage');
+// پشکێنینی ئەوەی ئایا لینکەکە بۆ وەڵامدانەوە کراوەتەوە یان نا
+const urlParams = new URLSearchParams(window.location.search);
+const origQuestion = urlParams.get('q');
+const friendName = urlParams.get('n');
+
+if (origQuestion && friendName) {
+    // ئەگەر ئیسماعیل لینکەکەی کردبێتەوە، دیزاینی سایتەکە دەگۆڕێت بۆ بۆکسی وەڵامدانەوە
+    document.querySelector('.subtitle').innerText = `سڵاو ${friendName}، وەڵامی ئەم پرسیارە بدەرەوە تا بچێتە گرووپە کۆنەکەتان.`;
+    document.getElementById('questionInput').placeholder = "وەڵامەکەت لێرە بنووسە... 💬";
+    document.getElementById('questionInput').value = "";
     
-    const question = questionInput.value.trim();
+    // پیشاندانی دەقی پرسیارەکە لە سەرەوەی بۆکسەکە
+    const qBox = document.createElement('div');
+    qBox.innerHTML = `<p style="background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:15px; font-weight:bold; color:#856404;">🤔 پرسیارەکە: "${origQuestion}"</p>`;
+    document.querySelector('.input-section').insertBefore(qBox, document.getElementById('questionInput'));
+    
+    // گۆڕینی فەرمانی دوگمەکە بۆ ناردنی وەڵام
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.innerText = "ناردنی وەڵام بۆ گرووپ 📢";
+    sendBtn.onclick = async function() {
+        const answer = document.getElementById('questionInput').value.trim();
+        if(!answer) return alert("تکایە وەڵامێک بنووسە!");
+        
+        sendBtn.disabled = true;
+        sendBtn.innerText = "لۆدین بەڕێوەیە... ⏳";
+        
+        try {
+            const res = await fetch('/api/send-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer, origQuestion, friendName })
+            });
+            
+            if(res.ok) {
+                document.getElementById('statusMessage').innerText = "✅ وەڵامەکەت بە سەرکەوتوویی نێردرا بۆ ناو گرووپی کۆن!";
+                document.querySelector('.input-section').style.display = 'none';
+            } else {
+                alert("کێشەیەک ڕوویدا!");
+            }
+        } catch(e) {
+            alert("هەڵە لە پەیوەندی سێرڤەر!");
+        }
+    }
+}
+
+// لۆجیکی ئاسایی سایتەکە کاتێک کەسێک دەیەوێت پرسیار بنێرێت
+async function startRandomSelection() {
+    const question = document.getElementById('questionInput').value.trim();
     if (!question) {
-        alert("تکایە سەرەتا پرسیارێک بنووسە! ✍️");
+        alert("تکایە سەرەتا پرسیارێک بنووسە!");
         return;
     }
 
+    const sendBtn = document.getElementById('sendBtn');
     sendBtn.disabled = true;
     sendBtn.innerText = "ناردنی نهێنی... 🚀";
-    statusMessage.innerText = "";
 
     try {
         const response = await fetch('/api/send-question', {
@@ -21,13 +63,13 @@ async function startRandomSelection() {
         });
 
         if (response.ok) {
-            statusMessage.innerHTML = "<span style='color: green; font-weight: bold;'>✅ پرسیارەکەت بە سەرکەوتوویی ڕاستەوخۆ نێردرا بۆ ناو گرووپ!</span>";
-            questionInput.value = "";
+            document.getElementById('statusMessage').innerText = "🎲 پرسیارەکەت بە سەرکەوتوویی بۆ ئیسماعیل نێردرا!";
+            document.getElementById('questionInput').value = "";
         } else {
-            statusMessage.innerHTML = "<span style='color: red;'>❌ کێشەیەک لە ناردندا هەیە، دووبارە تاقیکەرەوە.</span>";
+            document.getElementById('statusMessage').innerText = "❌ کێشەیەک لە ناردندا هەیە.";
         }
     } catch (error) {
-        statusMessage.innerHTML = "<span style='color: red;'>❌ ناتوانرێت پەیوەندی بە سێرڤەرەوە بکرێت.</span>";
+        document.getElementById('statusMessage').innerText = "❌ ناتوانرێت پەیوەندی بە سێرڤەرەوە بکرێت.";
     } finally {
         sendBtn.disabled = false;
         sendBtn.innerText = "ناردنی نهێنی 🚀";
