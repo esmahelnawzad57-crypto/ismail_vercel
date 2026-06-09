@@ -1,51 +1,49 @@
-// پشکێنینی لینک
-const urlParams = new URLSearchParams(window.location.search);
-const origQuestion = urlParams.get('q');
-const friendName = urlParams.get('n');
+const BOT_TOKEN = '8329299504:AAFQbJKcvsEZQzyOwgD5G7eJJRaU810hmpI';
+const GROUP_CHAT_ID = '-1003385254039';
+const FRIENDS = [
+    { name: "شەنیار", id: "5285811533" },
+    { name: "عبدالباست", id: "8094239190" },
+    { name: "اسماعیل", id: "8471929492" },
+    { name: "سۆنیا", id: "8356643097" },
+    { name: "شەهین", id: "8294302530" },
+    { name: "ڕاز", id: "6675931933" }
+];
 
-const inputField = document.getElementById('questionInput');
-const sendBtn = document.getElementById('sendBtn');
-const statusBox = document.getElementById('statusMessage');
+module.exports = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
-// ئەگەر لینکەکە بۆ وەڵامدانەوە بوو
-if (origQuestion && friendName) {
-    // گۆڕینی ناونیشانی سایتەکە بۆ ئەوەی وەک سوپرایز بێت
-    document.querySelector('h1').innerText = "💌 پەیامێکی نهێنی!";
-    document.querySelector('.subtitle').innerHTML = `سڵاو <b>${friendName}</b>، شتێکی تایبەتت بۆ هاتووە... ✨`;
-    
-    // سڕینەوەی گریدی هاوڕێکان بۆ ئەوەی تەنها بۆکسی پرسیارەکە بمێنێتەوە
-    document.querySelector('.friends-grid').style.display = 'none';
-    
-    // دروستکردنی بۆکسێکی سوپرایز بۆ پرسیارەکە
-    const surpriseBox = document.createElement('div');
-    surpriseBox.style.cssText = "background: #0f172a; padding: 25px; border-radius: 20px; border: 2px solid #38bdf8; margin-bottom: 25px; animation: popIn 0.6s ease-out;";
-    surpriseBox.innerHTML = `
-        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 10px;">پرسیارەکە بۆ تۆیە:</p>
-        <h2 style="color: #fff; font-size: 20px;">"${origQuestion}"</h2>
-    `;
-    document.querySelector('.input-section').prepend(surpriseBox);
-    
-    inputField.placeholder = "وەڵامەکەت لێرە بنووسە...";
-    sendBtn.innerText = "ناردنی وەڵام بۆ گرووپ 📢";
-    
-    sendBtn.onclick = async () => {
-        const answer = inputField.value.trim();
-        if(!answer) return alert("وەڵامێک بنووسە!");
-        
-        sendBtn.disabled = true;
-        sendBtn.innerText = "دەنێردرێت... ⏳";
-        
-        const res = await fetch('/api/send-question', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ answer, origQuestion, friendName })
-        });
-        
-        if(res.ok) {
-            statusBox.className = "status-box success";
-            statusBox.innerText = "✅ وەڵامەکەت بە سەرکەوتوویی نێردرا!";
-            inputField.style.display = 'none';
-            sendBtn.style.display = 'none';
+    try {
+        const { question, answer, origQuestion, friendName } = req.body;
+
+        if (question) {
+            const friend = FRIENDS[Math.floor(Math.random() * FRIENDS.length)];
+            const link = `https://ismail-vercel.vercel.app/?q=${encodeURIComponent(question)}&n=${encodeURIComponent(friend.name)}`;
+            
+            // ناردنی پەیامێک کە پرسیارەکەی تێدا نییە، تەنها لینکەکەی تێدایە بە شێوازی نهێنی
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    chat_id: friend.id, 
+                    text: `📩 **پرسیارێکی نهێنی نوێت بۆ هاتووە!**\n\nئەمە سوپرایزێکی تایبەتە، تەنها کلیک بکە بۆ بینینی پرسیارەکە:\n\n[📥 بینینی پرسیار و وەڵامدانەوە](${link})`,
+                    parse_mode: 'Markdown'
+                })
+            });
+            return res.status(200).json({ success: true });
         }
-    };
-}
+
+        if (answer) {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    chat_id: GROUP_CHAT_ID, 
+                    text: `📢 وەڵام بۆ (${friendName}):\n\n🤔 **پرسیار:**\n"${origQuestion}"\n\n✍️ **وەڵام:**\n"${answer}"` 
+                })
+            });
+            return res.status(200).json({ success: true });
+        }
+        return res.status(400).json({ error: 'Data missing' });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
+};
