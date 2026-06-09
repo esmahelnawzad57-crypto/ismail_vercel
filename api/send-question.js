@@ -1,7 +1,7 @@
 const BOT_TOKEN = '8329299504:AAFQbJKcvsEZQzyOwgD5G7eJJRaU810hmpI';
-const GROUP_CHAT_ID = '@bestgroup1111111';
+const GROUP_CHAT_ID = '-1005196416114'; // 👈 ئایدی گرووپە نوێیەکەت کە خۆت ئۆنەریتی
 
-// 🔒 تەنها ناوی تۆ لێرەیە بۆ تاقیکردنەوەی کۆتایی
+// 🔒 هێشتا تەنها ناوی تۆ لێرەیە بۆ تاقیکردنەوەی فەرمی
 const FRIENDS = [
     { name: "اسماعیل", id: "8471929492" }
 ];
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
             }
         }
 
-        // ٢. وەرگرتنی ڕیپڵایەکەت و ناردنی بۆ ناو گرووپی پەبڵیک
+        // ٢. وەرگرتنی ڕیپڵایەکەت و ناردنی بۆ ناو گرووپە نوێیەکەت
         if (body.message && body.message.reply_to_message) {
             const originalBotMessage = body.message.reply_to_message.text;
             const answerText = body.message.text;
@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
 
                 const groupMessage = `📢 وەڵامێکی نوێ هات!\n\n🤔 پرسیار:\n"${questionText}"\n\n✍️ وەڵامی (اسماعیل):\n"${answerText}"`;
 
-                // ناردنی فەرمی بۆ گرووپ
+                // ناردنی فەرمی بۆ گرووپە نوێیەکەت
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
