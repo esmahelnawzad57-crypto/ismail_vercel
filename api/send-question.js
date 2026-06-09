@@ -1,10 +1,5 @@
 const BOT_TOKEN = '8329299504:AAFQbJKcvsEZQzyOwgD5G7eJJRaU810hmpI';
-const GROUP_CHAT_ID = '-1003385254039'; // 👈 لێرەدا ئایدی گرووپە پرایڤتە نوێیەکەت جێگیرکرا
-
-// 🔒 تەنها ناوی تۆ لێرەیە بۆ تاقیکردنەوەی فەرمی
-const FRIENDS = [
-    { name: "اسماعیل", id: "8471929492" }
-];
+const MY_ID = '8471929492'; // ئایدی ئیسماعیل
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,44 +11,29 @@ module.exports = async (req, res) => {
     try {
         const body = req.body;
 
-        // ١. ناردنی لۆنکی وەڵامدانەوە بۆ چاتی تایبەتی ئیسماعیل
         if (body.question) {
             const questionText = body.question;
-            const friend = FRIENDS[0]; 
-
-            const encodedQ = encodeURIComponent(questionText);
-            const encodedN = encodeURIComponent(friend.name);
-            const answerLink = `https://ismail-vercel.vercel.app/?q=${encodedQ}&n=${encodedN}`;
-
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            
+            // ناردنی ڕاستەوخۆ بۆ چاتی تایبەتی ئیسماعیل
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: friend.id,
-                    text: `❓ پرسیارێکی نوێی نهێنت بۆ هاتووە!\n\n👇 بۆ بینینی پرسیارەکە و وەڵامدانەوەی، کلیک لەسەر ئەم لینکەی خوارەوە بکە:\n\n🔗 ${answerLink}`
+                    chat_id: MY_ID,
+                    text: `📩 پرسیارێکی نوێ بۆ تێست:\n\n"${questionText}"`
                 })
             });
 
-            return res.status(200).json({ success: true });
+            const result = await response.json();
+            if (result.ok) {
+                return res.status(200).json({ success: true, message: "نێردرا بۆ ئیسماعیل" });
+            } else {
+                return res.status(500).json({ error: 'کێشە لە تێلیگرام' });
+            }
         }
 
-        // ٢. ناردنی ڕاستەوخۆی وەڵام لە سایتەکەوە بۆ ناو گرووپە پرایڤتەکە
-        if (body.answer && body.origQuestion && body.friendName) {
-            const groupMessage = `📢 وەڵامێکی نوێ هات!\n\n🤔 **پرسیار:**\n"${body.origQuestion}"\n\n✍️ **وەڵامی (${body.friendName}):**\n"${body.answer}"`;
+        return res.status(400).json({ error: 'No question provided' });
 
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: GROUP_CHAT_ID,
-                    text: groupMessage
-                })
-            });
-
-            return res.status(200).json({ success: true });
-        }
-
-        return res.status(400).json({ error: 'Bad Request' });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
