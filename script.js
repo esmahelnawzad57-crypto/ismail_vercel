@@ -7,6 +7,7 @@ function startRandomSelection() {
     if (!questionText) {
         statusMessage.textContent = "تکایە سەرەتا پرسیارێک بنووسە! ⚠️";
         statusMessage.className = "status-box error";
+        statusMessage.style.display = "block";
         return;
     }
 
@@ -28,7 +29,7 @@ function startRandomSelection() {
 
         if (shuffleCount > 20) {
             clearInterval(interval);
-            cards.forEach(card => card.classList.remove('active')); // لادانی ڕووناکی ناوەکان بۆ ئەوەی ئاشکرا نەبێت
+            cards.forEach(card => card.classList.remove('active')); 
             
             // ناردنی پرسیارەکە بۆ سێرڤەر
             submitQuestionToServer(questionText);
@@ -40,6 +41,7 @@ async function submitQuestionToServer(question) {
     const statusMessage = document.getElementById('statusMessage');
     const sendBtn = document.getElementById('sendBtn');
 
+    // لێرەدا پشتڕاستی دەکەینەوە کە ڕێگاکە ڕێک بەرەو API فۆڵدەرەکە دەچێت
     try {
         const response = await fetch('/api/send-question', {
             method: 'POST',
@@ -47,16 +49,24 @@ async function submitQuestionToServer(question) {
             body: JSON.stringify({ question: question }),
         });
 
+        statusMessage.style.display = "block"; // دڵنیابوون لەوەی پەیامەکە دیار دەبێت
+
         if (response.ok) {
-            // گۆڕینی پەیامەکە ڕێک بۆ ئەوەی کە تۆ داوات کردووە
-            statusMessage.textContent = "نامەکە نێردرا";
+            statusMessage.textContent = "نامەکە نێردرا 😍🚀";
             statusMessage.className = "status-box success";
-            document.getElementById('questionInput').value = ""; // پاککردنەوەی سندوقی پرسیارەکە
+            document.getElementById('questionInput').value = ""; // پاککردنەوەی سندوقەکە
         } else {
-            statusMessage.textContent = "کێشەیەک لە سێرڤەر ڕوویدا، تکایە دووبارە تاقیکەرەوە. ❌";
+            const errData = await response.json().catch(() => ({}));
+            // ئەگەر هاوڕێکانی تر ستارتیان نەکردبێت، لێرە پێمان دەڵێت
+            if (errData.error) {
+                statusMessage.textContent = errData.error;
+            } else {
+                statusMessage.textContent = "کێشەیەک لە سێرڤەر ڕوویدا، تکایە دووبارە تاقیکەرەوە. ❌";
+            }
             statusMessage.className = "status-box error";
         }
     } catch (error) {
+        statusMessage.style.display = "block";
         statusMessage.textContent = "هەڵە: ناتوانرێت پەیوەندی بە سێرڤەرەوە بکرێت. 🌐";
         statusMessage.className = "status-box error";
     } finally {
