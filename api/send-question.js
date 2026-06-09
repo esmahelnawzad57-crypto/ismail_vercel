@@ -1,7 +1,7 @@
 const BOT_TOKEN = '8329299504:AAFQbJKcvsEZQzyOwgD5G7eJJRaU810hmpI';
-const GROUP_CHAT_ID = '@bestgroup1111111'; // 👈 گەڕایەوە سەر گرووپە کۆنەکەتان
+const GROUP_CHAT_ID = '-1003385254039'; // 👈 لێرەدا ئایدی گرووپە پرایڤتە نوێیەکەت جێگیرکرا
 
-// 🔒 تەنها ناوی تۆ لێرەیە بۆ تاقیکردنەوە
+// 🔒 تەنها ناوی تۆ لێرەیە بۆ تاقیکردنەوەی فەرمی
 const FRIENDS = [
     { name: "اسماعیل", id: "8471929492" }
 ];
@@ -23,7 +23,6 @@ module.exports = async (req, res) => {
 
             const encodedQ = encodeURIComponent(questionText);
             const encodedN = encodeURIComponent(friend.name);
-            // دروستکردنی لۆنک بۆ سەر سایتەکەت
             const answerLink = `https://ismail-vercel.vercel.app/?q=${encodedQ}&n=${encodedN}`;
 
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -38,7 +37,7 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true });
         }
 
-        // ٢. ناردنی ڕاستەوخۆی وەڵام لە سایتەکەوە بۆ ناو گرووپی کۆن
+        // ٢. ناردنی ڕاستەوخۆی وەڵام لە سایتەکەوە بۆ ناو گرووپە پرایڤتەکە
         if (body.answer && body.origQuestion && body.friendName) {
             const groupMessage = `📢 وەڵامێکی نوێ هات!\n\n🤔 **پرسیار:**\n"${body.origQuestion}"\n\n✍️ **وەڵامی (${body.friendName}):**\n"${body.answer}"`;
 
