@@ -1,8 +1,7 @@
-const fetch = require('node-fetch');
+// ⚠️ هێڵی node-fetch لادرا بۆ ئەوەی لەسەر ڤێرسێل کێشە دروست نەبێت
 
-// زانیارییە چاککراوەکان
 const BOT_TOKEN = '8329299504:AAFQbJKcvsEZQzyOwgD5G7eJJRaU810hmpI';
-const GROUP_CHAT_ID = '-1003385254039'; // 👈 لێرە نیشانەی منهای کورت و ١٠٠ زیادکرا بۆ ئەوەی ببێتە ئایدی گرووپ
+const GROUP_CHAT_ID = '-1003385254039';
 
 const FRIENDS = [
     { name: "شەنیار", id: "5285811533" },
@@ -31,18 +30,14 @@ module.exports = async (req, res) => {
     try {
         const body = req.body;
 
-        // ١. ناردنی پرسیاری نوێ لە وێبسایتەکەوە
         if (body.question) {
             const questionText = body.question;
-
-            // تێکەڵکردنی لیستی هاوڕێکان بە شێوازی هەڕەمەکی بۆ ئەوەی دادپەروەرانە بێت
             const shuffledFriends = [...FRIENDS].sort(() => Math.random() - 0.5);
             
             let messageSent = false;
             let telegramResult = null;
             let selectedFriend = null;
 
-            // گەڕان بەدوای یەکەم هاوڕێدا کە بۆتەکەی بلۆک نەکردووە
             for (const friend of shuffledFriends) {
                 const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
                 const response = await fetch(telegramUrl, {
@@ -59,7 +54,7 @@ module.exports = async (req, res) => {
                 if (telegramResult.ok) {
                     messageSent = true;
                     selectedFriend = friend;
-                    break; // نامەکە ڕۆشت، ئیتر ناچێت بۆ کەسی تر
+                    break;
                 }
             }
 
@@ -72,12 +67,10 @@ module.exports = async (req, res) => {
 
                 return res.status(200).json({ success: true, message: "نامەکە نێردرا" });
             } else {
-                // ئەگەر چاتی هیچکام لە هاوڕێکان دەستپێنەکردبوو
                 return res.status(500).json({ error: 'هەموو هاوڕێکان پێویستە سەرەتا بۆتەکە ستارت بکەن!' });
             }
         }
 
-        // ٢. وەڵامدانەوە لە تیلیگرامەوە (Webhook)
         if (body.message && body.message.reply_to_message) {
             const replyToMsgId = body.message.reply_to_message.message_id;
             const answerText = body.message.text;
