@@ -1,4 +1,4 @@
-// پشکێنینی لینک بۆ وەڵامدانەوە
+// پشکێنینی لینک
 const urlParams = new URLSearchParams(window.location.search);
 const origQuestion = urlParams.get('q');
 const friendName = urlParams.get('n');
@@ -7,18 +7,33 @@ const inputField = document.getElementById('questionInput');
 const sendBtn = document.getElementById('sendBtn');
 const statusBox = document.getElementById('statusMessage');
 
-// ئەگەر هاوڕێکە لینکەکەی کردبێتەوە
+// ئەگەر لینکەکە بۆ وەڵامدانەوە بوو
 if (origQuestion && friendName) {
-    document.querySelector('.subtitle').innerHTML = `سڵاو <b>${friendName}</b>، وەڵامی ئەم پرسیارە بدەرەوە بۆ گرووپ:`;
+    // گۆڕینی ناونیشانی سایتەکە بۆ ئەوەی وەک سوپرایز بێت
+    document.querySelector('h1').innerText = "💌 پەیامێکی نهێنی!";
+    document.querySelector('.subtitle').innerHTML = `سڵاو <b>${friendName}</b>، شتێکی تایبەتت بۆ هاتووە... ✨`;
+    
+    // سڕینەوەی گریدی هاوڕێکان بۆ ئەوەی تەنها بۆکسی پرسیارەکە بمێنێتەوە
+    document.querySelector('.friends-grid').style.display = 'none';
+    
+    // دروستکردنی بۆکسێکی سوپرایز بۆ پرسیارەکە
+    const surpriseBox = document.createElement('div');
+    surpriseBox.style.cssText = "background: #0f172a; padding: 25px; border-radius: 20px; border: 2px solid #38bdf8; margin-bottom: 25px; animation: popIn 0.6s ease-out;";
+    surpriseBox.innerHTML = `
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 10px;">پرسیارەکە بۆ تۆیە:</p>
+        <h2 style="color: #fff; font-size: 20px;">"${origQuestion}"</h2>
+    `;
+    document.querySelector('.input-section').prepend(surpriseBox);
+    
     inputField.placeholder = "وەڵامەکەت لێرە بنووسە...";
-    sendBtn.innerText = "ناردنی وەڵام 📢";
+    sendBtn.innerText = "ناردنی وەڵام بۆ گرووپ 📢";
     
     sendBtn.onclick = async () => {
         const answer = inputField.value.trim();
         if(!answer) return alert("وەڵامێک بنووسە!");
         
         sendBtn.disabled = true;
-        sendBtn.innerText = "چاوەڕێ بە... ⏳";
+        sendBtn.innerText = "دەنێردرێت... ⏳";
         
         const res = await fetch('/api/send-question', {
             method: 'POST',
@@ -28,49 +43,9 @@ if (origQuestion && friendName) {
         
         if(res.ok) {
             statusBox.className = "status-box success";
-            statusBox.innerText = "✅ وەڵامەکەت بە سەرکەوتوویی نێردرا بۆ گرووپ!";
+            statusBox.innerText = "✅ وەڵامەکەت بە سەرکەوتوویی نێردرا!";
             inputField.style.display = 'none';
             sendBtn.style.display = 'none';
         }
     };
-}
-
-// 🎲 لۆجیکی تیروپشکی (ئەنیمەیشنەکە)
-async function startRandomSelection() {
-    const question = inputField.value.trim();
-    if (!question) return alert("تکایە سەرەتا پرسیارێک بنووسە!");
-
-    const cards = document.querySelectorAll('.friend-card');
-    sendBtn.disabled = true;
-    
-    // ئەنیمەیشنی ڕووناککردنەوەی کارتی هاوڕێکان
-    for (let i = 0; i < 3; i++) { // ٣ خول ئەنیمەیشن
-        for (let card of cards) {
-            card.classList.add('active');
-            await new Promise(r => setTimeout(r, 100));
-            card.classList.remove('active');
-        }
-    }
-
-    sendBtn.innerText = "ناردنی نهێنی... 🚀";
-
-    try {
-        const response = await fetch('/api/send-question', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ question })
-        });
-
-        if (response.ok) {
-            statusBox.className = "status-box success";
-            statusBox.innerText = "🎲 پرسیارەکەت بە سەرکەوتوویی نێردرا!";
-            inputField.value = "";
-        }
-    } catch (e) {
-        statusBox.className = "status-box error";
-        statusBox.innerText = "❌ هەڵەیەک ڕوویدا!";
-    } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerText = "ناردنی نهێنی 🚀";
-    }
 }
