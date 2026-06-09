@@ -1,9 +1,14 @@
 const BOT_TOKEN = '8329299504:AAFQbJKcvsEZQzyOwgD5G7eJJRaU810hmpI';
-const GROUP_CHAT_ID = '-1003385254039'; // 👈 لێرەدا ئایدی گرووپە پرایڤتە نوێیەکەت جێگیرکرا
+const GROUP_CHAT_ID = '-1003385254039';
 
-// 🔒 تەنها ناوی تۆ لێرەیە بۆ تاقیکردنەوەی فەرمی
+// 👥 ناوی هەموو هاوڕێکانت زیادکران
 const FRIENDS = [
-    { name: "اسماعیل", id: "8471929492" }
+    { name: "شەنیار", id: "5285811533" },
+    { name: "عبدالباست", id: "8094239190" },
+    { name: "اسماعیل", id: "8471929492" },
+    { name: "سۆنیا", id: "8356643097" },
+    { name: "شەهین", id: "8294302530" },
+    { name: "ڕاز", id: "6675931933" }
 ];
 
 module.exports = async (req, res) => {
@@ -16,10 +21,9 @@ module.exports = async (req, res) => {
     try {
         const body = req.body;
 
-        // ١. ناردنی لۆنکی وەڵامدانەوە بۆ چاتی تایبەتی ئیسماعیل
         if (body.question) {
             const questionText = body.question;
-            const friend = FRIENDS[0]; 
+            const friend = FRIENDS[Math.floor(Math.random() * FRIENDS.length)]; 
 
             const encodedQ = encodeURIComponent(questionText);
             const encodedN = encodeURIComponent(friend.name);
@@ -37,7 +41,6 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true });
         }
 
-        // ٢. ناردنی ڕاستەوخۆی وەڵام لە سایتەکەوە بۆ ناو گرووپە پرایڤتەکە
         if (body.answer && body.origQuestion && body.friendName) {
             const groupMessage = `📢 وەڵامێکی نوێ هات!\n\n🤔 **پرسیار:**\n"${body.origQuestion}"\n\n✍️ **وەڵامی (${body.friendName}):**\n"${body.answer}"`;
 
