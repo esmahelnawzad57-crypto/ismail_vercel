@@ -1,76 +1,77 @@
-function startRandomSelection() {
-    const questionText = document.getElementById('questionInput').value.trim();
-    const statusMessage = document.getElementById('statusMessage');
-    const sendBtn = document.getElementById('sendBtn');
-    const cards = document.querySelectorAll('.friend-card');
+// پشکێنینی ئەوەی ئایا لینکەکە بۆ وەڵامدانەوە کراوەتەوە یان نا
+const urlParams = new URLSearchParams(window.location.search);
+const origQuestion = urlParams.get('q');
+const friendName = urlParams.get('n');
 
-    if (!questionText) {
-        statusMessage.textContent = "تکایە سەرەتا پرسیارێک بنووسە! ⚠️";
-        statusMessage.className = "status-box error";
-        statusMessage.style.display = "block";
+if (origQuestion && friendName) {
+    // ئەگەر ئیسماعیل لینکەکەی کردبێتەوە، دیزاینی سایتەکە دەگۆڕێت بۆ بۆکسی وەڵامدانەوە
+    document.querySelector('.subtitle').innerText = `سڵاو ${friendName}، وەڵامی ئەم پرسیارە بدەرەوە تا بچێتە گرووپە کۆنەکەتان.`;
+    document.getElementById('questionInput').placeholder = "وەڵامەکەت لێرە بنووسە... 💬";
+    document.getElementById('questionInput').value = "";
+    
+    // پیشاندانی دەقی پرسیارەکە لە سەرەوەی بۆکسەکە
+    const qBox = document.createElement('div');
+    qBox.innerHTML = `<p style="background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:15px; font-weight:bold; color:#856404;">🤔 پرسیارەکە: "${origQuestion}"</p>`;
+    document.querySelector('.input-section').insertBefore(qBox, document.getElementById('questionInput'));
+    
+    // گۆڕینی فەرمانی دوگمەکە بۆ ناردنی وەڵام
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.innerText = "ناردنی وەڵام بۆ گرووپ 📢";
+    sendBtn.onclick = async function() {
+        const answer = document.getElementById('questionInput').value.trim();
+        if(!answer) return alert("تکایە وەڵامێک بنووسە!");
+        
+        sendBtn.disabled = true;
+        sendBtn.innerText = "لۆدین بەڕێوەیە... ⏳";
+        
+        try {
+            const res = await fetch('/api/send-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer, origQuestion, friendName })
+            });
+            
+            if(res.ok) {
+                document.getElementById('statusMessage').innerText = "✅ وەڵامەکەت بە سەرکەوتوویی نێردرا بۆ ناو گرووپی کۆن!";
+                document.querySelector('.input-section').style.display = 'none';
+            } else {
+                alert("کێشەیەک ڕوویدا!");
+            }
+        } catch(e) {
+            alert("هەڵە لە پەیوەندی سێرڤەر!");
+        }
+    }
+}
+
+// لۆجیکی ئاسایی سایتەکە کاتێک کەسێک دەیەوێت پرسیار بنێرێت
+async function startRandomSelection() {
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) {
+        alert("تکایە سەرەتا پرسیارێک بنووسە!");
         return;
     }
 
-    // دەستپێکردنی پرۆسەکە
-    sendBtn.disabled = true;
-    sendBtn.textContent = "خەریکە هاوڕێیەک هەڵدەبژێردرێت... 🎲";
-    statusMessage.style.display = "none";
-
-    let currentIndex = 0;
-    let shuffleCount = 0;
-    
-    // ئەنیمەیشنی گەڕان بەسەر ناوەکاندا
-    const interval = setInterval(() => {
-        cards.forEach(card => card.classList.remove('active'));
-        cards[currentIndex].classList.add('active');
-        
-        currentIndex = (currentIndex + 1) % cards.length;
-        shuffleCount++;
-
-        if (shuffleCount > 20) {
-            clearInterval(interval);
-            cards.forEach(card => card.classList.remove('active')); 
-            
-            // ناردنی پرسیارەکە بۆ سێرڤەر
-            submitQuestionToServer(questionText);
-        }
-    }, 100);
-}
-
-async function submitQuestionToServer(question) {
-    const statusMessage = document.getElementById('statusMessage');
     const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    sendBtn.innerText = "ناردنی نهێنی... 🚀";
 
-    // لێرەدا پشتڕاستی دەکەینەوە کە ڕێگاکە ڕێک بەرەو API فۆڵدەرەکە دەچێت
     try {
         const response = await fetch('/api/send-question', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: question }),
+            body: JSON.stringify({ question })
         });
 
-        statusMessage.style.display = "block"; // دڵنیابوون لەوەی پەیامەکە دیار دەبێت
-
         if (response.ok) {
-            statusMessage.textContent = "نامەکە نێردرا 😍🚀";
-            statusMessage.className = "status-box success";
-            document.getElementById('questionInput').value = ""; // پاککردنەوەی سندوقەکە
+            document.getElementById('statusMessage').innerText = "🎲 پرسیارەکەت بە سەرکەوتوویی بۆ ئیسماعیل نێردرا!";
+            document.getElementById('questionInput').value = "";
         } else {
-            const errData = await response.json().catch(() => ({}));
-            // ئەگەر هاوڕێکانی تر ستارتیان نەکردبێت، لێرە پێمان دەڵێت
-            if (errData.error) {
-                statusMessage.textContent = errData.error;
-            } else {
-                statusMessage.textContent = "کێشەیەک لە سێرڤەر ڕوویدا، تکایە دووبارە تاقیکەرەوە. ❌";
-            }
-            statusMessage.className = "status-box error";
+            document.getElementById('statusMessage').innerText = "❌ کێشەیەک لە ناردندا هەیە.";
         }
     } catch (error) {
-        statusMessage.style.display = "block";
-        statusMessage.textContent = "هەڵە: ناتوانرێت پەیوەندی بە سێرڤەرەوە بکرێت. 🌐";
-        statusMessage.className = "status-box error";
+        document.getElementById('statusMessage').innerText = "❌ ناتوانرێت پەیوەندی بە سێرڤەرەوە بکرێت.";
     } finally {
         sendBtn.disabled = false;
-        sendBtn.textContent = "ناردنی نهێنی 🚀";
+        sendBtn.innerText = "ناردنی نهێنی 🚀";
     }
 }
